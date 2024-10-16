@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 import requests
 import random
 import uuid
@@ -7,7 +7,6 @@ import time
 
 app = Flask(__name__)
 
-# List of user agents for requests
 user_agents = [
     "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36",
     "Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
@@ -16,12 +15,13 @@ user_agents = [
 ]
 
 task_running = False
+logs = []
 
 def generate_random_device_id():
     return str(uuid.uuid4())
 
 def send_requests():
-    global task_running
+    global task_running, logs
     while task_running:
         user_agent = random.choice(user_agents)
         device_id = generate_random_device_id()
@@ -42,32 +42,46 @@ def send_requests():
         try:
             response = requests.post("https://ngl.link/api/submit", headers=headers, data=data)
             log_message = f"Success: {response.status_code}" if response.status_code == 200 else f"Failed: {response.status_code}"
-            print(log_message)
         except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}")
-
+            log_message = f"Request failed: {e}"
+        
+        logs.append(log_message)
+        if len(logs) > 100:  # Keep only the latest 100 log entries
+            logs.pop(0)
+        
         time.sleep(1)  # Pause between requests
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    global task_running
-    if request.method == 'POST':
-        if not task_running:
-            task_running = True
-            thread = threading.Thread(target=send_requests)
-            thread.start()
-            return redirect(url_for('index'))
     return render_template('index.html')
+
+@app.route('/start', methods=['POST'])
+def start():
+    global task_running
+    if not task_running:
+        task_running = True
+        thread = threading.Thread(target=send_requests)
+        thread.start()
+    return '', 204
 
 @app.route('/stop', methods=['POST'])
 def stop():
     global task_running
     task_running = False
-    return redirect(url_for('index'))
+    return '', 204
+
+@app.route('/status')
+def status():
+    message = "Task is running." if task_running else "Task is stopped. Ready to start."
+    return jsonify({"task_running": task_running, "message": message})
+
+@app.route('/logs')
+def get_logs():
+    return jsonify({"logs": logs})
 
 def keep_alive():
     url = "https://tasrin.onrender.com"
-    interval = 300  # Ping every 10 minutes
+    interval = 600  # Ping every 10 minutes
 
     while True:
         try:
