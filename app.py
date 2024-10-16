@@ -7,6 +7,7 @@ import time
 
 app = Flask(__name__)
 
+# List of user agents for requests
 user_agents = [
     "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36",
     "Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
@@ -32,7 +33,7 @@ def send_requests():
         
         data = {
             "username": "tasin95775",
-            "question": "Sample question",
+            "question": "এই সব খেলা ইনবক্সে করলেই তো হয় হুদাই সিঙ্গেলদের জ্বালাতন করার কোনো মানে হয়? - পরের বার এইটার রিপ্লাই দিয়েন",
             "deviceId": device_id,
             "gameSlug": "",
             "referrer": ""
@@ -64,5 +65,22 @@ def stop():
     task_running = False
     return redirect(url_for('index'))
 
+def keep_alive():
+    url = "https://tasrin.onrender.com"
+    interval = 300  # Ping every 10 minutes
+
+    while True:
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                print(f"Successfully pinged {url} - Status Code: {response.status_code}")
+            else:
+                print(f"Failed to ping {url} - Status Code: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error pinging {url}: {e}")
+
+        time.sleep(interval)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    threading.Thread(target=keep_alive, daemon=True).start()
+    app.run(host='0.0.0.0', port=5000, debug=True)
