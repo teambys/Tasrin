@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Themed Panel</title>
+    <style>
+        body {
+            background-color: black;
+            color: green;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        button {
+            background-color: darkgreen;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: lime;
+        }
+        .log {
+            margin-top: 20px;
+            border: 1px solid green;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+            background-color: #111;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hacker Themed Request Panel</h1>
+    <form method="post">
+        <button type="submit">Start Requesting</button>
+    </form>
+    <form action="/stop" method="post">
+        <button type="submit">Stop Requesting</button>
+    </form>
+    <div class="log">
+        <!-- Logs will appear here -->
+    </div>
+</body>
+</html>
