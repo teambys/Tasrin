@@ -37,19 +37,57 @@
 </head>
 <body>
     <h1>Hacker Themed Request Panel</h1>
-    <form method="post">
-        <button type="submit">Start Requesting</button>
-    </form>
-    <form action="/stop" method="post">
-        <button type="submit">Stop Requesting</button>
-    </form>
+    <div id="controls">
+        <form id="start-form" method="post" style="display: none;">
+            <button type="button" onclick="startTask()">Start Requesting</button>
+        </form>
+        <form id="stop-form" method="post" style="display: none;">
+            <button type="button" onclick="stopTask()">Stop Requesting</button>
+        </form>
+    </div>
     <div class="status">
-        <p>Application is running. Keep-alive mechanism is active.</p>
+        <p id="status-message">Checking status...</p>
     </div>
-    <div class="log">
-        <!-- Logs will appear here -->
-        <!-- This can be populated with a backend solution or dynamically with JavaScript -->
-        <p>Logs will be displayed here when the backend is configured to update them.</p>
+    <div class="log" id="log">
+        <p>Logs will be displayed here.</p>
     </div>
+
+    <script>
+        function updateStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('status-message').innerText = data.message;
+                    document.getElementById('start-form').style.display = data.task_running ? 'none' : 'block';
+                    document.getElementById('stop-form').style.display = data.task_running ? 'block' : 'none';
+                });
+        }
+
+        function fetchLogs() {
+            fetch('/logs')
+                .then(response => response.json())
+                .then(data => {
+                    const logElement = document.getElementById('log');
+                    logElement.innerHTML = data.logs.map(log => `<p>${log}</p>`).join('');
+                });
+        }
+
+        function startTask() {
+            fetch('/start', { method: 'POST' })
+                .then(() => updateStatus());
+        }
+
+        function stopTask() {
+            fetch('/stop', { method: 'POST' })
+                .then(() => updateStatus());
+        }
+
+        setInterval(updateStatus, 5000);  // Update status every 5 seconds
+        setInterval(fetchLogs, 3000);     // Fetch logs every 3 seconds
+
+        // Initial status check
+        updateStatus();
+        fetchLogs();
+    </script>
 </body>
 </html>
