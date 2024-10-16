@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacker Themed Panel</title>
+    <title>Hacker Themed Request Panel</title>
     <style>
         body {
             background-color: black;
@@ -14,6 +14,7 @@
             background-color: darkgreen;
             color: white;
             padding: 10px 20px;
+            margin: 10px 0;
             border: none;
             cursor: pointer;
         }
@@ -28,6 +29,10 @@
             overflow-y: scroll;
             background-color: #111;
         }
+        .status {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
@@ -38,8 +43,13 @@
     <form action="/stop" method="post">
         <button type="submit">Stop Requesting</button>
     </form>
+    <div class="status">
+        <p>Application is running. Keep-alive mechanism is active.</p>
+    </div>
     <div class="log">
         <!-- Logs will appear here -->
+        <!-- This can be populated with a backend solution or dynamically with JavaScript -->
+        <p>Logs will be displayed here when the backend is configured to update them.</p>
     </div>
 </body>
 </html>
